@@ -23,7 +23,7 @@ function App() {
   const [userEmail, setUserEmail] = useState('')
 
 
-  var authEndpoint = 'http://localhost:4000'
+  var authEndpoint = process.env.REACT_APP_API_HOST
   var sdkKey = process.env.REACT_APP_SDK
 
   var role = 0
@@ -67,7 +67,7 @@ function App() {
           sdkKey: sdkKey,
           meetingNumber: meetingId,
           passWord: password,
-          userName: userName,
+          userName: user,
           userEmail: userEmail,
           tk: registrantToken,
           zak: zakToken,
