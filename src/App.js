@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 
 import './App.css';
 import { ZoomMtg } from '@zoomus/websdk';
-import * as ZoomVideo from '@zoom/videosdk';
+// import * as ZoomVideo from '@zoom/videosdk';
+import { generateVideoToken } from './utils';
 
 ZoomMtg.setZoomJSLib('https://source.zoom.us/2.14.0/lib', '/av');
 
@@ -14,17 +15,13 @@ ZoomMtg.i18n.reload('en-US');
 
 function App() {
 
-  console.log(process.env.REACT_APP_SDK)
+  const [meetingId, setMeetingId] = useState('97046415015')
+  const [password, setPassword] = useState('d7gvcr')
 
-  const [meetingId, setMeetingId] = useState('')
-  const [password, setPassword] = useState('')
+  const [user, setUser] = useState('deepak')
+  const [userEmail, setUserEmail] = useState('deepak.paliwal@ccc.com')
 
-  const [user, setUser] = useState('')
-  const [userEmail, setUserEmail] = useState('')
-
-
-  var authEndpoint = process.env.REACT_APP_API_HOST
-  var sdkKey = process.env.REACT_APP_SDK
+  var sdkKey = process.env.REACT_APP_ZOOM_MEETING_SDK_KEY
 
   var role = 0
   var registrantToken = ''
@@ -38,20 +35,24 @@ function App() {
     }
     e.preventDefault();
 
-    fetch(authEndpoint, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        meetingNumber: meetingId,
-        role: role
-      })
-    }).then(res => res.json())
-      .then(response => {
-        startMeeting(response.signature)
-      }).catch(error => {
-        console.error(error)
-        alert("something went wrong !")
-      })
+    let signature = generateVideoToken(meetingId)
+    console.log(signature)
+    startMeeting(signature)
+
+    // fetch(authEndpoint, {
+    //   method: 'POST',
+    //   headers: { 'Content-Type': 'application/json' },
+    //   body: JSON.stringify({
+    //     meetingNumber: meetingId,
+    //     role: role
+    //   })
+    // }).then(res => res.json())
+    //   .then(response => {
+    //     startMeeting(response.signature)
+    //   }).catch(error => {
+    //     console.error(error)
+    //     alert("something went wrong !")
+    //   })
   }
 
   async function startMeeting(signature) {
