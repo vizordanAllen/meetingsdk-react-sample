@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 import './App.css';
 import { ZoomMtg } from '@zoomus/websdk';
+import * as ZoomVideo from '@zoom/videosdk';
 
 ZoomMtg.setZoomJSLib('https://source.zoom.us/2.14.0/lib', '/av');
 
@@ -13,36 +14,47 @@ ZoomMtg.i18n.reload('en-US');
 
 function App() {
 
-  var authEndpoint = ''
-  var sdkKey = ''
-  var meetingNumber = '123456789'
-  var passWord = ''
+  console.log(process.env.REACT_APP_SDK)
+
+  const [meetingId, setMeetingId] = useState('')
+  const [password, setPassword] = useState('')
+
+  const [user, setUser] = useState('')
+  const [userEmail, setUserEmail] = useState('')
+
+
+  var authEndpoint = 'http://localhost:4000'
+  var sdkKey = process.env.REACT_APP_SDK
+
   var role = 0
-  var userName = 'React'
-  var userEmail = ''
   var registrantToken = ''
   var zakToken = ''
   var leaveUrl = 'http://localhost:3000'
 
   function getSignature(e) {
+    if (!meetingId || !password) {
+      alert("Meeting id and password is required")
+      return
+    }
     e.preventDefault();
 
     fetch(authEndpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        meetingNumber: meetingNumber,
+        meetingNumber: meetingId,
         role: role
       })
     }).then(res => res.json())
-    .then(response => {
-      startMeeting(response.signature)
-    }).catch(error => {
-      console.error(error)
-    })
+      .then(response => {
+        startMeeting(response.signature)
+      }).catch(error => {
+        console.error(error)
+        alert("something went wrong !")
+      })
   }
 
-  function startMeeting(signature) {
+  async function startMeeting(signature) {
     document.getElementById('zmmtg-root').style.display = 'block'
 
     ZoomMtg.init({
@@ -53,8 +65,8 @@ function App() {
         ZoomMtg.join({
           signature: signature,
           sdkKey: sdkKey,
-          meetingNumber: meetingNumber,
-          passWord: passWord,
+          meetingNumber: meetingId,
+          passWord: password,
           userName: userName,
           userEmail: userEmail,
           tk: registrantToken,
@@ -74,10 +86,25 @@ function App() {
     })
   }
 
+  const meetingChange = (e) => {
+    let value = e.target.value.split(" ").join("")
+    setMeetingId(value)
+  }
+
   return (
     <div className="App">
       <main>
         <h1>Zoom Meeting SDK Sample React</h1>
+
+        <div>
+          <input value={meetingId} onChange={meetingChange} placeholder='Meeting Number' />
+          <input value={password} onChange={(e) => setPassword(e.target.value)} placeholder='passcode' />
+
+        </div>
+        <div>
+          <input value={user} onChange={(e) => setUser(e.target.value)} placeholder='User Name' />
+          <input value={userEmail} onChange={(e) => setUserEmail(e.target.value)} placeholder='email' />
+        </div>
 
         <button onClick={getSignature}>Join Meeting</button>
       </main>
